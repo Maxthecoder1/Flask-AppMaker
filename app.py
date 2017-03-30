@@ -4,6 +4,7 @@ import random
 import shutil
 
 from distutils.dir_util import copy_tree
+dir = os.path.dirname(__file__)
 app = Flask(__name__)
 app.secret_key = 'MaxavierJeanphilippe'
 #file = open('app.py', mode='w')
@@ -103,14 +104,14 @@ def routes():
 @app.route('/edownload', methods=['POST', 'GET'])
 def edownload():
     if request.method == 'POST':
-        copy_tree("static\\flask_web_app", "static\\{0}".format(newappfilename))
-        with open('static\\{0}\\app.py'.format(newappfilename), mode='w') as file:
+        copy_tree( os.path.join(dir, "static/flask_web_app"),  os.path.join(dir, "static/{0}".format(newappfilename)))
+        with open( os.path.join(dir, 'static/{0}/app.py').format(newappfilename), mode='w') as file:
             if len(request.form) == 4:
                 import_creator(file, request.form['extras'])
                 express_model_creator(file, request.form['extras'], int(request.form['models']))
                 express_route_creator(file, int(request.form['routes']), request.form['extras'])
                 file.write("if __name__ == '__main__':\n\tdb.engine.echo = True\n\tdb.metadata.bind = db.engine\n\tdb.metadata.create_all(checkfirst=True)\n\tapp.run()")
-                shutil.make_archive(newappfilename, 'zip', root_dir="static/")
+                shutil.make_archive(newappfilename, 'zip', root_dir=os.path.join(dir, "static/{0}".format(newappfilename)))
 
         return render_template("edownload.html", zipf="{0}.zip".format(newappfilename))
     if request.method == 'GET':
@@ -130,7 +131,7 @@ def download():
         return render_template("download.html")
 
 
-@app.route('/static/<filename>', methods=['GET'])
+@app.route('/<filename>', methods=['GET'])
 def downlo(filename):
     return send_file(filename_or_fp="{0}".format(filename))
 
