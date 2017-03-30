@@ -1,2 +1,1 @@
-# Flask-AppMaker
-Flask-AppMaker is the next generation of automated web development. Flask-AppMaker is a Flask Web App that allows you to design a Flask Web App(models & routes) and outputs the python code for you to download. #FLASKCEPTION
+Flask-AppMaker is the next generation of fast & automated web application development. Flask App-Maker is a Flask Web App that allows you to design a Flask Web App (models & routes) and then it outputs a zipfile that contains the Python code and directories for you to download. Minimal configuration is needed to get the Flask-AppMaker's outputted code up and running.
