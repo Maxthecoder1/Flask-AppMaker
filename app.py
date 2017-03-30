@@ -27,7 +27,7 @@ def import_creator(file, options):
 
 def express_model_creator(file, extras, models):
     if extras == 'none':
-        for m in models:
+        for m in range(models):
             file.write("class Table{0}(db.Model):\n".format(m))
             file.write('\t__tablename__ = "table{0}"\n'.format(m))
             file.write("\tid = db.Column('id', db.Integer, primary_key=True)\n\n")
@@ -39,7 +39,7 @@ def express_model_creator(file, extras, models):
         file.write("\tid = db.Column('id', db.Integer, primary_key=True)\n\n")
         file.write("\tdef init(self):\n")
         file.write("\t```initialize column variables```\n\n")
-        for m in  models:
+        for m in range(models):
             file.write("class Table{0}(db.Model):\n".format(m))
             file.write("\tid = db.Column('id', db.Integer, primary_key=True)\n\n")
             file.write("\tdef init(self):\n")
@@ -51,7 +51,7 @@ def express_model_creator(file, extras, models):
         file.write('\t@login_manager.user_loader\n\tdef user_load(id):\n\t\treturn User.query.get(id)\n\n\tdef is_active(self):\n\t\t"""True, as all users are active."""\n\t\treturn True\n\n\tdef get_id(self):\n\t\treturn self.id\n\n\tdef is_authenticated(self):\n\t\t"""Return True if the user is authenticated."""\n\t\treturn True\n\n\tdef is_anonymous(self):\n\t\t"""False, as anonymous users are not supported."""\n\t\treturn True\n\n')
         file.write("\tdef init(self):\n")
         file.write("\t```initialize column variables```\n\n\n")
-        for m in models:
+        for m in range(models):
             file.write("class Table{0}(db.Model):\n".format(m))
             file.write('\t__tablename__ = "table{0}"\n'.format(m))
             file.write("\tid = db.Column('id', db.Integer, primary_key=True)\n\n")
@@ -80,12 +80,6 @@ def home():
 @app.route('/custom', methods=['GET'])
 def custom():
     global newappfilename
-    global newapp
-    if newapp is not None:
-        newapp = None
-    if newappfilename is not None:
-        os.removedirs("static/{0}".format(newappfilename))
-        os.remove("{0}".format(newappfilename))
     newappfilename = "flaskwebapp{0}".format(random.randint(0, 100000))
     return render_template('comingsoon.html')
 
@@ -93,9 +87,6 @@ def custom():
 @app.route('/express', methods=['GET'])
 def express():
     global newappfilename
-    if newappfilename is not None:
-        os.removedirs("static/{0}".format(newappfilename))
-        os.remove("{0}".format(newappfilename))
     newappfilename = "flaskwebapp{0}".format(random.randint(0, 100000))
     return render_template('startdesign.html')
 
@@ -109,7 +100,7 @@ def routes():
     return render_template('howmanycolumns.html')
 
 
-@app.route('/edownload', methods=['POST'])
+@app.route('/edownload', methods=['POST', 'GET'])
 def edownload():
     if request.method == 'POST':
         copy_tree("static\\flask_web_app", "static\\{0}".format(newappfilename))
@@ -119,9 +110,11 @@ def edownload():
                 express_model_creator(file, request.form['extras'], int(request.form['models']))
                 express_route_creator(file, int(request.form['routes']), request.form['extras'])
                 file.write("if __name__ == '__main__':\n\tdb.engine.echo = True\n\tdb.metadata.bind = db.engine\n\tdb.metadata.create_all(checkfirst=True)\n\tapp.run()")
-                shutil.make_archive(newappfilename, 'zip', root_dir="static", base_dir="{0}".format(newappfilename))
-        return render_template("edownload.html", zipf="{0}.zip".format(newappfilename))
+                shutil.make_archive(newappfilename, 'zip', root_dir="static/")
 
+        return render_template("edownload.html", zipf="{0}.zip".format(newappfilename))
+    if request.method == 'GET':
+        return render_template("edownload.html", zipf="{0}.zip".format(newappfilename))
 
 @app.route('/download', methods=['POST'])
 def download():
@@ -137,9 +130,9 @@ def download():
         return render_template("download.html")
 
 
-@app.route('/<filename>', methods=['GET', 'POST'])
+@app.route('/static/<filename>', methods=['GET'])
 def downlo(filename):
-    return send_file(filename_or_fp="{0}.zip".format(filename))
+    return send_file(filename_or_fp="{0}".format(filename))
 
 
 @app.errorhandler(code_or_exception=404)
