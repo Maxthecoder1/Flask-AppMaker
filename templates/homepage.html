@@ -1,0 +1,87 @@
+{% extends 'layout.html' %}
+{% from 'macros.html' import icon %}
+{% block content %}
+{% if error %}
+      <p><strong>Error:</strong> {{ error }}
+      {% endif %}
+{% with messages = get_flashed_messages() %}
+         {% if messages %}
+            <ul>
+               {% for message in messages %}
+               <li<{{ message }}</li>
+               {% endfor %}
+            </ul>
+         {% endif %}
+      {% endwith %}
+<div class="row">
+           
+<div class="col-md-9">
+	<h2 class="lead"><b><u>Overdue Lending</u></b></h2>            
+{% if overdue.count() > 0 %}
+            <table id="lending-table" class="table">
+               <tr>
+                    <th>#</th>
+                    <th>Resource</th>
+                    <th>Lendee</th>
+                    <th>Date Lent</th>
+		    <th>Expected Date Returned</th>
+                </tr>
+                {%- for lend in overdue %}
+                    <tr {% if lend.datetime_returned %}class="success"{% else %}class="danger"{% endif %}>
+                        <td> {{ loop.index }} </td>
+                        <td {% if lend.datetime_returned %}style="text-decoration:line-through"{% endif %}><a href="{{ url_for('oneresource', resource_id=lend.resource_id)}}">{{ lend.resource.name }} - {{ lend.resource.serialnum}}</td>
+                        <td>{{ lend.lendee }}</td>
+                        <td>{{ lend.datetime_lent }}</td>
+                        <td>{{ lend.datetime_expected_return }}</td>
+                        <td>
+                            <a class="btn btn-xs btn-default{% if lend.datetime_returned %} disabled{% endif %}"  href="{{ url_for('update_lending', lending_id=lend.id) }}" >{{ icon('edit') }} Edit</a>
+                                                        <form id=isdone action="{{ url_for('mark_done', lending_id=lend.id) }}" method="post">
+                                {#<input class="btn btn-xs btn-default" type="submit" name="mark_done" value="Returned"{% if lend.datetime_returned %} disabled{% endif %}>#}
+                                <a onclick="$('#isdone').submit()" class="btn btn-xs btn-default" id="mark_done"{% if lend.datetime_returned %} disabled{% endif %}>{{ icon('check') }} Returned</a>
+                            </form>
+                        </td>
+                    </tr>
+                {%- endfor %}
+            </table>
+{% else %}
+            <h2 class="lead">Nothing is over due…</h2>{% endif %}
+<br>
+<div>
+<h2 class="lead"><b><u>Upcoming Lending Due Dates</u></b></h2> 
+</div>
+{% if upcoming|length > 0 %}
+            <table id="lending-table2" class="table">
+               <tr>
+                    <th>#</th>
+                    <th>Resource</th>
+                    <th>Lendee</th>
+                    <th>Date Lent</th>
+		    <th>Expected Date Returned</th>
+		    <th>Time Left(days)</th>
+                </tr>
+                {%- for lend in upcoming %}
+			{%- for days in daylist %}
+                    <tr {% if lend.datetime_returned %}class="success"{% else %}class="danger"{% endif %}>
+                        <td> {{ loop.index }} </td>
+                        <td {% if lend.datetime_returned %}style="text-decoration:line-through"{% endif %}><a href="{{ url_for('oneresource', resource_id=lend.resource_id)}}">{{ lend.resource.name }} - {{ lend.resource.serialnum}}</td>
+                        <td>{{ lend.lendee }}</td>
+                        <td>{{ lend.datetime_lent }}</td>
+                        <td>{{ lend.datetime_expected_return }}</td>
+			<td>{{  days  }}</td>
+                        <td>
+                            <a class="btn btn-xs btn-default{% if lend.datetime_returned %} disabled{% endif %}"  href="{{ url_for('update_lending', lending_id=lend.id) }}" >{{ icon('edit') }} Edit</a>
+                                                        <form id=isdone action="{{ url_for('mark_done', lending_id=lend.id) }}" method="post">
+                                {#<input class="btn btn-xs btn-default" type="submit" name="mark_done" value="Returned"{% if lend.datetime_returned %} disabled{% endif %}>#}
+                                <a onclick="$('#isdone').submit()" class="btn btn-xs btn-default" id="mark_done"{% if lend.datetime_returned %} disabled{% endif %}>{{ icon('check') }} Returned</a>
+                            </form>
+                        </td>
+                    </tr>
+                {%- endfor %}
+                {%- endfor %}
+            </table>
+
+{% else %}
+            <h2 class="lead">No upcoming due dates…</h2>{% endif %}
+</div>
+</div>
+{% endblock %}
